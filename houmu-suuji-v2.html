@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>経営法務 数字道場 v2</title>
+<style>
+:root{
+  --ink:#0e1220;
+  --panel:#181e33;
+  --panel2:#1f2742;
+  --line:#2c3557;
+  --gold:#e8c46a;
+  --gold-dim:#a98f4e;
+  --shu:#d1493f;
+  --green:#5fbf82;
+  --yellow:#d8b04a;
+  --gray:#4a5379;
+  --text:#e7e9f2;
+  --sub:#9aa3c0;
+  --serif:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  --sans:"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--ink);color:var(--text);font-family:var(--sans);
+  background-image:radial-gradient(ellipse at 50% -10%, #1b2340 0%, var(--ink) 60%);}
+.app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:14px 14px 20px}
+
+/* ---------- header ---------- */
+header{display:flex;align-items:baseline;justify-content:space-between;padding:6px 2px 10px;border-bottom:1px solid var(--line)}
+h1{font-family:var(--serif);font-size:19px;letter-spacing:.14em;font-weight:600}
+h1 .num{color:var(--gold)}
+.hright{text-align:right;font-size:11px;color:var(--sub);line-height:1.5}
+.hright b{color:var(--gold);font-size:14px;font-family:var(--serif)}
+.hright .exam{cursor:pointer;text-decoration:underline dotted}
+
+/* ---------- home ---------- */
+.screen{display:none;flex-direction:column;flex:1}
+.home{gap:10px;padding-top:14px}
+.dash{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.dash .dtitle{font-size:11px;letter-spacing:.18em;color:var(--gold-dim);font-family:var(--serif);margin-bottom:8px}
+.dash .total{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.dash .total b{font-family:var(--serif);font-size:34px;color:var(--gold)}
+.dash .total span{font-size:12px;color:var(--sub)}
+.bar{height:7px;background:#252d4d;border-radius:4px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.bar .b3{background:var(--green)}.bar .b2{background:var(--yellow)}.bar .b1{background:#7a86b8}.bar .b0{background:var(--shu)}
+.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;font-size:10px;color:var(--sub)}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px;vertical-align:middle}
+.catrow{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px;cursor:pointer}
+.catrow:active{background:var(--panel2)}
+.catrow .ct{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.catrow .cn{font-family:var(--serif);font-size:15px;letter-spacing:.06em}
+.catrow .cs{font-size:11px;color:var(--sub)}
+.catrow .cs b{color:var(--green);font-family:var(--serif);font-size:14px}
+.catrow.weak{border-color:var(--shu)}
+.catrow.weak .cn{color:#eda49e}
+.homebtns{display:flex;gap:8px}
+.homebtns button{flex:1;background:none;border:1px solid var(--line);border-radius:10px;color:var(--sub);padding:10px 0;font-size:13px;cursor:pointer}
+.homebtns button:active{color:var(--gold)}
+
+/* ---------- setup ---------- */
+.setup{gap:14px;padding-top:16px}
+.stitle{font-family:var(--serif);font-size:17px;letter-spacing:.08em;text-align:center;padding:6px 0 2px}
+.stitle small{display:block;font-size:11px;color:var(--sub);margin-top:4px;letter-spacing:.05em}
+.opt{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+.opt .ol{font-size:11px;letter-spacing:.15em;color:var(--gold-dim);font-family:var(--serif);margin-bottom:9px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{flex:1;min-width:60px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--sub);padding:10px 0;font-size:13px;cursor:pointer}
+.chips button.on{border-color:var(--gold);color:var(--gold);background:rgba(232,196,106,.08)}
+.startbtn{background:var(--gold);border:none;border-radius:12px;padding:15px 0;font-size:16px;font-weight:700;color:#1a1508;cursor:pointer;margin-top:4px}
+.backlink{background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;padding:8px}
+
+/* ---------- quiz ---------- */
+.topline{display:flex;justify-content:space-between;align-items:center;padding:10px 2px;font-size:12px;color:var(--sub)}
+.topline .back{background:none;border:none;color:var(--sub);font-size:13px;cursor:pointer;padding:4px 8px 4px 0}
+.prog{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:14px}
+.prog i{display:block;height:100%;background:var(--gold);width:0%;transition:width .3s}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 16px;min-height:160px;
+  display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.tag{font-size:11px;color:var(--gold-dim);letter-spacing:.15em;font-family:var(--serif);display:flex;gap:8px;align-items:center}
+.mdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.qitem{font-family:var(--serif);font-size:16px;letter-spacing:.04em;line-height:1.6;font-weight:600}
+.qbody{font-size:14px;color:var(--sub);line-height:1.8}
+.blankline{margin-top:auto;display:flex;align-items:baseline;justify-content:center;gap:6px;padding:8px 0 2px}
+.blank{font-family:var(--serif);font-size:42px;letter-spacing:.06em;color:var(--gold);min-width:90px;text-align:center;
+  border-bottom:2px solid var(--gold-dim);line-height:1.1;padding:0 8px}
+.blank.empty{color:#3d4568}
+.unit{font-family:var(--serif);font-size:16px;color:var(--text)}
+.hint{position:absolute;top:14px;right:14px;font-size:11px;color:var(--sub);border:1px solid var(--line);border-radius:20px;padding:3px 10px}
+.hanko{position:absolute;top:50%;left:50%;width:110px;height:110px;border:4px solid;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:.1em;
+  transform:translate(-50%,-50%) rotate(-12deg) scale(2.2);opacity:0;pointer-events:none}
+.hanko.show{animation:stamp .35s cubic-bezier(.2,1.4,.4,1) forwards}
+.hanko.ok{color:var(--shu);border-color:var(--shu)}
+.hanko.ng{color:#6b7bb8;border-color:#6b7bb8}
+@keyframes stamp{to{transform:translate(-50%,-50%) rotate(-12deg) scale(1);opacity:.9}}
+.ansnote{min-height:48px;padding:10px 4px 0;font-size:13px;color:var(--sub);line-height:1.7;text-align:center}
+.ansnote b{color:var(--gold);font-family:var(--serif);font-size:16px}
+.lvup{color:var(--green);font-size:12px}
+.lvdown{color:var(--shu);font-size:12px}
+.pad{margin-top:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:10px}
+.pad button{background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);
+  font-size:22px;font-family:var(--serif);padding:13px 0;cursor:pointer}
+.pad button:active{background:#2a335a}
+.pad .fn{font-size:14px;font-family:var(--sans);color:var(--sub)}
+.pad .go{background:var(--gold);color:#1a1508;border-color:var(--gold);font-family:var(--sans);font-size:16px;font-weight:700}
+.nextbar{display:none;padding-top:10px}
+.nextbar button{width:100%;background:var(--gold);border:none;border-radius:10px;padding:15px 0;font-size:16px;font-weight:700;color:#1a1508;cursor:pointer}
+
+/* ---------- result ---------- */
+.result{text-align:center;padding-top:34px}
+.result .big{font-family:var(--serif);font-size:56px;color:var(--gold)}
+.result .sub2{color:var(--sub);margin:8px 0 20px;font-size:14px}
+.result button{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--text);padding:14px 0;font-size:15px;margin-top:10px;cursor:pointer}
+.result button.primary{background:var(--gold);color:#1a1508;border-color:var(--gold);font-weight:700}
+.misslist{text-align:left;margin-top:22px;font-size:13px;color:var(--sub);line-height:2}
+.misslist b{color:var(--gold)}
+
+/* ---------- list ---------- */
+.listview{padding-top:4px}
+.lctrl{display:flex;gap:8px;padding:8px 0 12px}
+.lctrl button{flex:1;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--sub);padding:9px 0;font-size:12px;cursor:pointer}
+.lctrl button.on{border-color:var(--gold);color:var(--gold)}
+.ghead{font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--gold-dim);padding:14px 2px 6px}
+.lrow{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.lrow .mdot{margin-top:5px;flex-shrink:0}
+.lrow .li{font-size:13px;line-height:1.7;flex:1}
+.lrow .li .q2{font-weight:600}
+.lrow .ans{font-family:var(--serif);color:var(--gold);font-size:16px;white-space:nowrap;align-self:center}
+.lrow .ans.hide{color:transparent;text-shadow:0 0 12px rgba(232,196,106,.85)}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h1>経営法務 <span class="num">数字</span>道場</h1>
+  <div class="hright">
+    連続正解 <b id="streak">0</b><br>
+    <span class="exam" id="examday" onclick="setExam()"></span>
+  </div>
+</header>
+
+<!-- HOME -->
+<div class="screen home" id="home">
+  <div class="dash">
+    <div class="dtitle">定着度ダッシュボード</div>
+    <div class="total"><b id="masterpct">0%</b><span id="mastersub"></span></div>
+    <div class="bar" id="totalbar"></div>
+    <div class="legend">
+      <span><i style="background:var(--green)"></i>定着（3連続正解）</span>
+      <span><i style="background:var(--yellow)"></i>あと一歩</span>
+      <span><i style="background:#7a86b8"></i>学習中</span>
+      <span><i style="background:var(--shu)"></i>苦手</span>
+      <span><i style="background:var(--gray)"></i>未学習</span>
+    </div>
+  </div>
+  <div id="catrows"></div>
+  <div class="homebtns">
+    <button onclick="openList()">📖 一覧シート</button>
+    <button onclick="resetData()">記録リセット</button>
+  </div>
+</div>
+
+<!-- SETUP -->
+<div class="screen setup" id="setup">
+  <div class="stitle" id="setuptitle"></div>
+  <div class="opt">
+    <div class="ol">問題数</div>
+    <div class="chips" id="numchips"></div>
+  </div>
+  <div class="opt">
+    <div class="ol">出題順</div>
+    <div class="chips" id="ordchips">
+      <button data-v="random" class="on">ランダム</button>
+      <button data-v="weak">苦手優先</button>
+      <button data-v="seq">シート順</button>
+    </div>
+  </div>
+  <button class="startbtn" onclick="beginQuiz()">開始する</button>
+  <button class="backlink" onclick="goHome()">← 戻る</button>
+</div>
+
+<!-- LIST -->
+<div class="screen listview" id="listview">
+  <div class="topline"><button class="back" onclick="goHome()">← 戻る</button><span>一覧シート（タップで答え表示）</span></div>
+  <div class="lctrl">
+    <button id="lc-kaisha" onclick="listCat('kaisha')">会社法</button>
+    <button id="lc-chizai" onclick="listCat('chizai')">知財</button>
+    <button id="lc-sonota" onclick="listCat('sonota')">その他</button>
+    <button id="lc-toggle" onclick="listToggleAll()">全部見る</button>
+  </div>
+  <div id="listrows"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <div class="topline">
+    <button class="back" onclick="goHome()">← 中断</button>
+    <span id="counter"></span>
+  </div>
+  <div class="prog"><i id="progbar"></i></div>
+  <div class="card">
+    <span class="hint" id="fmt"></span>
+    <div class="tag"><span class="mdot" id="qdot"></span><span id="tag"></span></div>
+    <div class="qitem" id="qitem"></div>
+    <div class="qbody" id="qbody"></div>
+    <div class="blankline"><span class="blank empty" id="blank">?</span><span class="unit" id="unit"></span></div>
+    <div class="hanko" id="hanko"></div>
+  </div>
+  <div class="ansnote" id="ansnote"></div>
+  <div class="pad" id="pad">
+    <button onclick="key('7')">7</button><button onclick="key('8')">8</button><button onclick="key('9')">9</button>
+    <button onclick="key('4')">4</button><button onclick="key('5')">5</button><button onclick="key('6')">6</button>
+    <button onclick="key('1')">1</button><button onclick="key('2')">2</button><button onclick="key('3')">3</button>
+    <button class="fn" onclick="key('C')">消す</button><button onclick="key('0')">0</button><button class="go" onclick="submitAns()">判定</button>
+  </div>
+  <div class="nextbar" id="nextbar"><button onclick="nextQ()">次の問題 →</button></div>
+</div>
+
+<!-- RESULT -->
+<div class="screen result" id="result">
+  <div class="big" id="score"></div>
+  <div class="sub2" id="scoresub"></div>
+  <button class="primary" onclick="retryMiss()" id="retrybtn">間違えた問題だけ再挑戦</button>
+  <button onclick="show('setup')">同じ条件でもう一度</button>
+  <button onclick="goHome()">ホームへ戻る</button>
+  <div class="misslist" id="misslist"></div>
+</div>
+</div>
+
+<script>
+const DATA=[
+// ===== 会社法 =====
+{c:"kaisha",g:"設立関係",q:"設立登記の時期",b:"一定の日の翌日から【　】週間以内",a:"2",u:"週間以内"},
+{c:"kaisha",g:"設立関係",q:"現物出資の検査役免除",b:"出資財産の金額が【　】万円を超えない場合",a:"500",u:"万円"},
+{c:"kaisha",g:"設立関係",q:"事後設立の該当性①",b:"財産の取得が設立から【　】年以内",a:"2",u:"年以内"},
+{c:"kaisha",g:"設立関係",q:"事後設立の該当性②",b:"かつ、財産額が純資産の【　】分の1超",a:"5",u:"分の1超"},
+{c:"kaisha",g:"少数株主権",q:"議題提案権・議案要領通知権①",b:"総株主の議決権の【　】％以上",a:"1",u:"％以上"},
+{c:"kaisha",g:"少数株主権",q:"議題提案権・議案要領通知権②",b:"または議決権【　】個以上",a:"300",u:"個以上"},
+{c:"kaisha",g:"少数株主権",q:"議題提案権・議案要領通知権③",b:"（公開会社）以上に加えて保有期間【　】か月以上",a:"6",u:"か月以上"},
+{c:"kaisha",g:"少数株主権",q:"議題提案権・議案要領通知権④",b:"議題提案・議案要領通知は総会当日の【　】週間前までに行使する",a:"8",u:"週間前"},
+{c:"kaisha",g:"少数株主権",q:"会計帳簿閲覧請求権①",b:"総株主の議決権の【　】％以上",a:"3",u:"％以上"},
+{c:"kaisha",g:"少数株主権",q:"会計帳簿閲覧請求権②",b:"または発行済株式総数の【　】％以上",a:"3",u:"％以上"},
+{c:"kaisha",g:"少数株主権",q:"株主総会招集権①",b:"総株主の議決権の【　】％以上",a:"3",u:"％以上"},
+{c:"kaisha",g:"少数株主権",q:"株主総会招集権②",b:"（公開会社）以上に加えて保有期間【　】か月以上",a:"6",u:"か月以上"},
+{c:"kaisha",g:"少数株主権",q:"解散請求権",b:"総株主の議決権または発行済株式総数の【　】％以上",a:"10",u:"％以上"},
+{c:"kaisha",g:"株式関係",q:"譲渡制限株式の譲渡承認",b:"（役会設置会社の場合）承認請求されてから【　】週間以内",a:"2",u:"週間以内"},
+{c:"kaisha",g:"機関",q:"監査役会の最低人数",b:"監査役会は最低【　】名以上",a:"3",u:"名以上"},
+{c:"kaisha",g:"機関",q:"大会社の該当性①",b:"資本金【　】億円以上",a:"5",u:"億円以上"},
+{c:"kaisha",g:"機関",q:"大会社の該当性②",b:"または負債【　】億円以上",a:"200",u:"億円以上"},
+{c:"kaisha",g:"機関",q:"株主総会の招集期限①",b:"（取締役会設置会社）公開会社は【　】週間前",a:"2",u:"週間前"},
+{c:"kaisha",g:"機関",q:"株主総会の招集期限②",b:"非公開会社で書面投票等を認める場合は【　】週間前",a:"2",u:"週間前"},
+{c:"kaisha",g:"機関",q:"株主総会の招集期限③",b:"非公開会社で書面投票等を認めない場合は【　】週間前",a:"1",u:"週間前"},
+{c:"kaisha",g:"機関",q:"代表取締役の役会報告",b:"代表取締役の報告頻度は【　】か月に1回以上",a:"3",u:"か月に1回以上"},
+{c:"kaisha",g:"機関",q:"社外取締役の要件",b:"親族だと取締役等の【　】親等以内はダメ",a:"2",u:"親等以内"},
+{c:"kaisha",g:"機関",q:"監査役の任期",b:"監査役の任期は【　】年",a:"4",u:"年"},
+{c:"kaisha",g:"機関",q:"監査等委員の任期等①",b:"監査等委員の取締役任期は【　】年",a:"2",u:"年"},
+{c:"kaisha",g:"機関",q:"監査等委員の任期等②",b:"それ以外の取締役任期は【　】年",a:"1",u:"年"},
+{c:"kaisha",g:"資金調達",q:"現物出資の少数免除の要件",b:"割当株式が発行済株式総数の【　】分の1を超えない場合",a:"10",u:"分の1"},
+{c:"kaisha",g:"資金調達",q:"社債管理者設置免除①",b:"発行する社債が1単位あたり【　】億円以上",a:"1",u:"億円以上"},
+{c:"kaisha",g:"資金調達",q:"社債管理者設置免除②",b:"または発行する社債の単位数が【　】単位未満",a:"50",u:"単位未満"},
+{c:"kaisha",g:"組織再編",q:"合併と独禁法",b:"合併待機期間は届出受理日から【　】日",a:"30",u:"日"},
+{c:"kaisha",g:"組織再編",q:"会社分割と労働契約承継",b:"労働者への通知は分割承認の総会の日の【　】週間前の前日まで",a:"2",u:"週間前の前日"},
+{c:"kaisha",g:"情報開示",q:"大量保有報告書",b:"株式保有割合が【　】％を超えるとき",a:"5",u:"％超"},
+{c:"kaisha",g:"情報開示",q:"計算書類の備置①",b:"（役会設置会社）株主総会の日の【　】週間前から",a:"2",u:"週間前"},
+{c:"kaisha",g:"情報開示",q:"計算書類の備置②",b:"備置期間は【　】年間",a:"5",u:"年間"},
+{c:"kaisha",g:"情報開示",q:"計算書類の保存期間",b:"計算書類の作成の時から【　】年間",a:"10",u:"年間"},
+{c:"kaisha",g:"情報開示",q:"剰余金配当の要件",b:"配当のためには最低でも純資産が【　】万円以上",a:"300",u:"万円以上"},
+{c:"kaisha",g:"情報開示",q:"有価証券届出書①",b:"届出書が必要となる募集は【　】億円以上",a:"1",u:"億円以上"},
+{c:"kaisha",g:"情報開示",q:"有価証券届出書②",b:"その後、目論見書の交付までの熟慮期間は【　】日間",a:"15",u:"日間"},
+{c:"kaisha",g:"情報開示",q:"有価証券報告書①",b:"提出は事業年度終了後【　】か月以内",a:"3",u:"か月以内"},
+{c:"kaisha",g:"情報開示",q:"有価証券報告書②",b:"公衆縦覧期間は報告書受理日から【　】年間",a:"5",u:"年間"},
+{c:"kaisha",g:"情報開示",q:"インサイダー規制①",b:"インサイダー規制は退職後【　】年続く",a:"1",u:"年"},
+{c:"kaisha",g:"情報開示",q:"インサイダー規制②",b:"「公表」に該当するには報道機関【　】社に開示",a:"2",u:"社"},
+{c:"kaisha",g:"情報開示",q:"インサイダー規制③",b:"開示したあと【　】時間経過で「公表」",a:"12",u:"時間"},
+// ===== 知的財産法 =====
+{c:"chizai",g:"特許権",q:"特許権の存続期間",b:"出願の日から【　】年",a:"20",u:"年"},
+{c:"chizai",g:"特許権",q:"新規性喪失の例外①",b:"新規性を喪失した日から【　】年以内",a:"1",u:"年以内"},
+{c:"chizai",g:"特許権",q:"新規性喪失の例外②",b:"事実関係書面を出願日から【　】日以内",a:"30",u:"日以内"},
+{c:"chizai",g:"特許権",q:"出願公開",b:"出願の日から【　】か月後",a:"16",u:"か月後",f:"1年6か月→16"},
+{c:"chizai",g:"特許権",q:"出願審査請求",b:"出願の日から【　】年以内",a:"3",u:"年以内"},
+{c:"chizai",g:"特許権",q:"特許料の納付①",b:"特許査定謄本の到達の日から【　】日以内に",a:"30",u:"日以内"},
+{c:"chizai",g:"特許権",q:"特許料の納付②",b:"初回に限り、一括して【　】年度分を納付",a:"3",u:"年度分"},
+{c:"chizai",g:"特許権",q:"特許異議申し立て",b:"特許掲載公報発行日から【　】か月以内",a:"6",u:"か月以内"},
+{c:"chizai",g:"特許権",q:"不服申し立て",b:"拒絶査定の謄本の送達日から【　】か月以内",a:"3",u:"か月以内"},
+{c:"chizai",g:"実用新案権",q:"実用新案権の存続期間",b:"出願の日から【　】年",a:"10",u:"年"},
+{c:"chizai",g:"実用新案権",q:"登録料の支払い",b:"出願と同時に登録料【　】年分を納付（先払い）",a:"3",u:"年分"},
+{c:"chizai",g:"実用新案権",q:"特許への出願変更①",b:"実用新案出願日から【　】年以内",a:"3",u:"年以内"},
+{c:"chizai",g:"実用新案権",q:"特許への出願変更②",b:"他者が評価書を請求したときでも通知から【　】日以内は特許出願変更可",a:"30",u:"日以内"},
+{c:"chizai",g:"意匠権",q:"意匠権の存続期間",b:"出願の日から【　】年",a:"25",u:"年"},
+{c:"chizai",g:"意匠権",q:"関連意匠の出願期限",b:"基礎意匠の出願の日から【　】年",a:"10",u:"年"},
+{c:"chizai",g:"意匠権",q:"秘密意匠の期間",b:"意匠登録の日から【　】年を限度",a:"3",u:"年を限度"},
+{c:"chizai",g:"商標権",q:"商標権の期間",b:"商標登録の日から【　】年間",a:"10",u:"年間"},
+{c:"chizai",g:"商標権",q:"商標異議申し立て",b:"商標公報発行日から【　】か月以内",a:"2",u:"か月以内"},
+{c:"chizai",g:"商標権",q:"登録査定",b:"登録されるのは、拒絶理由が出願日から【　】か月以内に発見されない時",a:"16",u:"か月以内",f:"1年6か月→16"},
+{c:"chizai",g:"商標権",q:"不使用取消審判",b:"請求できるのは継続して【　】年以上不使用の場合",a:"3",u:"年以上"},
+{c:"chizai",g:"著作権",q:"著作権の存続期間",b:"生存中＋死亡の日の属する年の翌年から【　】年間",a:"70",u:"年間"},
+{c:"chizai",g:"著作権",q:"違法ダウンロードの罰則①",b:"違法ダウンロードは懲役【　】年以下",a:"2",u:"年以下"},
+{c:"chizai",g:"著作権",q:"違法ダウンロードの罰則②",b:"又は（あるいは「かつ」）罰金【　】万円",a:"200",u:"万円"},
+{c:"chizai",g:"不正競争防止",q:"形態模倣",b:"形態模倣規制は国内販売開始から【　】年間",a:"3",u:"年間"},
+// ===== その他の法律 =====
+{c:"sonota",g:"国際取引",q:"パリルート・PCTルート",b:"いずれも優先期間は【　】か月",a:"12",u:"か月"},
+{c:"sonota",g:"国際取引",q:"PCTルート",b:"さらに猶予期間が優先日から【　】か月",a:"30",u:"か月"},
+{c:"sonota",g:"独占禁止法",q:"公取委の執行方針",b:"優先的に審査する事案は商品のシェアが【　】分の1超",a:"2",u:"分の1超"},
+{c:"sonota",g:"破産法・民事再生法",q:"財団債権",b:"財団債権に含まれる給料債権は、開始決定前【　】か月分",a:"3",u:"か月分"},
+{c:"sonota",g:"破産法・民事再生法",q:"民事再生計画案の可決要件①",b:"出席した再生債権者等の【　】分の1超、かつ",a:"2",u:"分の1超"},
+{c:"sonota",g:"破産法・民事再生法",q:"民事再生計画案の可決要件②",b:"債権総額の【　】分の1以上が同意",a:"2",u:"分の1以上"},
+{c:"sonota",g:"下請法",q:"下請法適用取引①",b:"製造業関係は資本金の基準が【　】億円",a:"3",u:"億円"},
+{c:"sonota",g:"下請法",q:"下請法適用取引②",b:"役務提供関係は資本金の基準が【　】万円",a:"5000",u:"万円"},
+{c:"sonota",g:"下請法",q:"下請法適用取引③",b:"いずれも親事業者の資本金額として【　】万円超が必要",a:"1000",u:"万円超"},
+{c:"sonota",g:"民法",q:"不法行為賠償の時効（原則）①",b:"損害・加害者を知ったときから【　】年",a:"3",u:"年"},
+{c:"sonota",g:"民法",q:"不法行為賠償の時効（原則）②",b:"または不法行為のときから【　】年",a:"20",u:"年"},
+{c:"sonota",g:"民法",q:"不法行為賠償の時効（例外：生命身体加害）",b:"損害・加害者を知ったときから【　】年",a:"5",u:"年"},
+{c:"sonota",g:"民法",q:"債務不履行賠償の時効（原則）①",b:"権利を行使できると知ったときから【　】年",a:"5",u:"年"},
+{c:"sonota",g:"民法",q:"債務不履行賠償の時効（原則）②",b:"または権利を行使できるときから【　】年",a:"10",u:"年"},
+{c:"sonota",g:"民法",q:"債務不履行賠償の時効（例外：生命身体侵害）",b:"権利を行使できるときから【　】年",a:"20",u:"年"},
+{c:"sonota",g:"民法",q:"法定相続割合①",b:"第1順位（直系卑属）の者は【　】分の1",a:"2",u:"分の1"},
+{c:"sonota",g:"民法",q:"法定相続割合②",b:"第2順位（直系尊属）の者は【　】分の1",a:"3",u:"分の1"},
+{c:"sonota",g:"民法",q:"法定相続割合③",b:"第3順位（兄弟姉妹）の者は【　】分の1",a:"4",u:"分の1"},
+{c:"sonota",g:"民法",q:"相続放棄・限定承認",b:"相続開始を知ったときから【　】か月以内",a:"3",u:"か月以内"},
+{c:"sonota",g:"民法",q:"遺留分①",b:"配偶者又は直系卑属がいる場合は【　】分の1",a:"2",u:"分の1"},
+{c:"sonota",g:"民法",q:"遺留分②",b:"直系尊属のみの場合は【　】分の1",a:"3",u:"分の1"},
+{c:"sonota",g:"民法",q:"遺留分③",b:"兄弟姉妹は【　】（ゼロ）",a:"0",u:"（ゼロ）"},
+];
+DATA.forEach((d,i)=>d.id=i);
+const CATNAME={kaisha:"会社法",chizai:"知的財産法",sonota:"その他の法律",all:"全問ミックス",weak:"弱点復習"};
+
+/* ---------- storage & mastery ---------- */
+const LS="houmu-suuji-v2";
+let store=JSON.parse(localStorage.getItem(LS)||"{}");
+store.q=store.q||{}; store.streak=store.streak||0; store.exam=store.exam||"";
+// v1からの弱点引き継ぎ
+try{const v1=JSON.parse(localStorage.getItem("houmu-suuji-v1")||"{}");
+  if(v1.wrong)Object.keys(v1.wrong).forEach(id=>{if(!store.q[id])store.q[id]={s:0,n:1,c:0,w:1}});}catch(e){}
+function save(){localStorage.setItem(LS,JSON.stringify(store))}
+function qs(id){return store.q[id]||null}
+// レベル: 3=定着(3連続正解) 2=あと一歩(2連続) 1=学習中(1連続) 0=苦手(直近×) -1=未学習
+function lv(id){const s=qs(id); if(!s)return -1; return s.s>=3?3:s.s===2?2:s.s===1?1:0}
+const LVCOLOR={3:"var(--green)",2:"var(--yellow)",1:"#7a86b8",0:"var(--shu)","-1":"var(--gray)"};
+const LVNAME={3:"定着",2:"あと一歩",1:"学習中",0:"苦手","-1":"未学習"};
+
+/* ---------- header ---------- */
+function refreshExam(){
+  const el=document.getElementById("examday");
+  if(!store.exam){el.textContent="試験日を設定";return}
+  const days=Math.ceil((new Date(store.exam)-new Date().setHours(0,0,0,0))/86400000);
+  el.textContent=days>=0?`試験まであと ${days} 日`:"試験日を過ぎています";
+}
+function setExam(){
+  const v=prompt("一次試験の日付を入力（例: 2026-08-08）",store.exam||"2026-08-");
+  if(v===null)return;
+  if(/^\d{4}-\d{2}-\d{2}$/.test(v)){store.exam=v;save();refreshExam();}
+  else if(v==="")	{store.exam="";save();refreshExam();}
+  else alert("YYYY-MM-DD の形式で入力してください");
+}
+
+/* ---------- home / dashboard ---------- */
+function counts(list){
+  const c={3:0,2:0,1:0,0:0,"-1":0};
+  list.forEach(d=>c[lv(d.id)]++); return c;
+}
+function barHTML(c,total){
+  return ['b3','b2','b1','b0'].map((cls,i)=>{
+    const k=[3,2,1,0][i];
+    return `<i class="${cls}" style="width:${c[k]/total*100}%"></i>`;
+  }).join("");
+}
+function refreshHome(){
+  document.getElementById("streak").textContent=store.streak;
+  refreshExam();
+  const all=DATA, ca=counts(all);
+  document.getElementById("masterpct").textContent=Math.round(ca[3]/all.length*100)+"%";
+  document.getElementById("mastersub").textContent=`定着 ${ca[3]} / ${all.length} 問（苦手 ${ca[0]}・未学習 ${ca["-1"]}）`;
+  document.getElementById("totalbar").innerHTML=barHTML(ca,all.length);
+  const wrap=document.getElementById("catrows"); wrap.innerHTML="";
+  const weakList=DATA.filter(d=>lv(d.id)===0);
+  const defs=[["kaisha"],["chizai"],["sonota"],["all"]];
+  defs.forEach(([cat])=>{
+    const list=cat==="all"?DATA:DATA.filter(d=>d.c===cat);
+    const c=counts(list);
+    const div=document.createElement("div"); div.className="catrow";
+    div.innerHTML=`<div class="ct"><span class="cn">${CATNAME[cat]}</span><span class="cs">定着 <b>${c[3]}</b> / ${list.length}</span></div><div class="bar">${barHTML(c,list.length)}</div>`;
+    div.onclick=()=>openSetup(cat);
+    wrap.appendChild(div);
+  });
+  if(weakList.length){
+    const div=document.createElement("div"); div.className="catrow weak";
+    div.innerHTML=`<div class="ct"><span class="cn">弱点復習（直近で間違えた問題）</span><span class="cs" style="color:var(--shu)">${weakList.length} 問</span></div>`;
+    div.onclick=()=>openSetup("weak");
+    wrap.appendChild(div);
+  }
+}
+function show(id){["home","setup","quiz","result","listview"].forEach(s=>{
+  document.getElementById(s).style.display=(s===id)?"flex":"none";});}
+function goHome(){refreshHome();show("home")}
+function resetData(){
+  if(confirm("定着度・弱点の記録をすべてリセットしますか？")){
+    store.q={};store.streak=0;save();refreshHome();
+  }
+}
+
+/* ---------- setup ---------- */
+let setCat="all", setNum=10, setOrd="random";
+function getPool(cat){
+  if(cat==="weak")return DATA.filter(d=>lv(d.id)===0);
+  if(cat==="all")return DATA.slice();
+  return DATA.filter(d=>d.c===cat);
+}
+function openSetup(cat){
+  setCat=cat;
+  const base=getPool(cat);
+  document.getElementById("setuptitle").innerHTML=`${CATNAME[cat]}<small>全 ${base.length} 問</small>`;
+  const nums=[10,20,30].filter(n=>n<base.length);
+  const nc=document.getElementById("numchips"); nc.innerHTML="";
+  nums.concat(["全部"]).forEach(n=>{
+    const b=document.createElement("button"); b.textContent=n==="全部"?`全部（${base.length}）`:n+"問";
+    b.dataset.v=n;
+    if((setNum===n)||(n==="全部"&&(setNum==="全部"||!nums.includes(setNum))))b.classList.add("on");
+    b.onclick=()=>{setNum=n;[...nc.children].forEach(x=>x.classList.remove("on"));b.classList.add("on")};
+    nc.appendChild(b);
+  });
+  if(![...nc.children].some(b=>b.classList.contains("on")))nc.children[0].classList.add("on"),setNum=nums[0]||"全部";
+  [...document.getElementById("ordchips").children].forEach(b=>{
+    b.classList.toggle("on",b.dataset.v===setOrd);
+    b.onclick=()=>{setOrd=b.dataset.v;[...b.parentNode.children].forEach(x=>x.classList.remove("on"));b.classList.add("on")};
+  });
+  show("setup");
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+let pool=[],idx=0,buf="",correct=0,missed=[],answered=false;
+function beginQuiz(){
+  let base=getPool(setCat);
+  if(setOrd==="random")base=shuffle(base.slice());
+  else if(setOrd==="weak"){
+    // 苦手優先: レベル昇順→間違い回数降順、同レベル内は軽くシャッフル
+    base=shuffle(base.slice()).sort((x,y)=>{
+      const lx=lv(x.id),ly=lv(y.id);
+      if(lx!==ly)return lx-ly;
+      return (qs(y.id)?.w||0)-(qs(x.id)?.w||0);
+    });
+  }
+  const n=setNum==="全部"?base.length:Math.min(setNum,base.length);
+  pool=base.slice(0,n); idx=0; correct=0; missed=[];
+  show("quiz"); renderQ();
+}
+
+/* ---------- quiz ---------- */
+function renderQ(){
+  const d=pool[idx]; buf=""; answered=false;
+  document.getElementById("counter").textContent=`${idx+1} / ${pool.length}`;
+  document.getElementById("progbar").style.width=(idx/pool.length*100)+"%";
+  const L=lv(d.id);
+  const dot=document.getElementById("qdot");
+  dot.style.background=LVCOLOR[L]; dot.title=LVNAME[L];
+  document.getElementById("tag").textContent=`${CATNAME[d.c]}｜${d.g}｜${LVNAME[L]}`;
+  document.getElementById("qitem").textContent=d.q;
+  document.getElementById("qbody").textContent=d.b.replace("【　】","［　？　］");
+  document.getElementById("unit").textContent=d.u;
+  const fmt=document.getElementById("fmt");
+  fmt.textContent=d.f||""; fmt.style.display=d.f?"block":"none";
+  const bl=document.getElementById("blank"); bl.textContent="?"; bl.classList.add("empty");
+  const h=document.getElementById("hanko"); h.className="hanko"; h.textContent="";
+  document.getElementById("ansnote").innerHTML="";
+  document.getElementById("pad").style.display="grid";
+  document.getElementById("nextbar").style.display="none";
+}
+function key(k){
+  if(answered)return;
+  if(k==="C")buf="";
+  else if(buf.length<6)buf+=k;
+  const bl=document.getElementById("blank");
+  bl.textContent=buf||"?"; bl.classList.toggle("empty",!buf);
+}
+function submitAns(){
+  if(answered||!buf)return;
+  answered=true;
+  const d=pool[idx];
+  const ok=(buf===d.a);
+  const st=store.q[d.id]||(store.q[d.id]={s:0,n:0,c:0,w:0});
+  st.n++;
+  const before=lv(d.id);
+  if(ok){st.c++;st.s++;}else{st.w++;st.s=0;}
+  const after=lv(d.id);
+  const h=document.getElementById("hanko");
+  h.textContent=ok?"正解":"残念"; h.className="hanko show "+(ok?"ok":"ng");
+  const disp=d.f?"1年6か月":d.a;
+  document.getElementById("blank").textContent=buf;
+  let lvmsg="";
+  if(after>before&&after>=2)lvmsg=`<br><span class="lvup">▲ ${LVNAME[after]}にランクアップ${after===3?"！この数字は定着":""}</span>`;
+  if(!ok&&before>=2)lvmsg=`<br><span class="lvdown">▼ 定着リセット、また積み直し</span>`;
+  if(ok){
+    correct++; store.streak++;
+    document.getElementById("ansnote").innerHTML=`<b>${disp} ${d.u}</b>${lvmsg}`;
+  }else{
+    store.streak=0; missed.push(d);
+    document.getElementById("ansnote").innerHTML=`正解は <b>${disp} ${d.u}</b><br>${d.b.replace("【　】","【"+disp+"】")}${lvmsg}`;
+  }
+  save();
+  document.getElementById("streak").textContent=store.streak;
+  document.getElementById("pad").style.display="none";
+  document.getElementById("nextbar").style.display="block";
+}
+function nextQ(){
+  idx++;
+  if(idx>=pool.length)showResult(); else renderQ();
+}
+function showResult(){
+  show("result");
+  const pct=Math.round(correct/pool.length*100);
+  document.getElementById("score").textContent=`${correct} / ${pool.length}`;
+  const ca=counts(DATA);
+  document.getElementById("scoresub").textContent=`正答率 ${pct}%${pct===100?"　全問制覇！":""}　｜　全体定着 ${Math.round(ca[3]/DATA.length*100)}%`;
+  document.getElementById("retrybtn").style.display=missed.length?"block":"none";
+  const ml=document.getElementById("misslist");
+  ml.innerHTML=missed.length?"【要復習】<br>"+missed.map(d=>`・${d.q}：<b>${d.f?"1年6か月":d.a} ${d.u}</b>`).join("<br>"):"";
+}
+function retryMiss(){
+  pool=shuffle(missed.slice()); idx=0; correct=0; missed=[];
+  show("quiz"); renderQ();
+}
+
+/* ---------- list ---------- */
+let listCatCur="kaisha", listAllOpen=false;
+function openList(){listAllOpen=false;listCat(listCatCur)}
+function listCat(cat){
+  listCatCur=cat;
+  ["kaisha","chizai","sonota"].forEach(c=>document.getElementById("lc-"+c).classList.toggle("on",c===cat));
+  document.getElementById("lc-toggle").textContent=listAllOpen?"全部隠す":"全部見る";
+  const rows=document.getElementById("listrows"); rows.innerHTML="";
+  let lastG="";
+  DATA.filter(d=>d.c===cat).forEach(d=>{
+    if(d.g!==lastG){
+      lastG=d.g;
+      const gh=document.createElement("div"); gh.className="ghead"; gh.textContent=d.g;
+      rows.appendChild(gh);
+    }
+    const L=lv(d.id);
+    const div=document.createElement("div"); div.className="lrow";
+    div.innerHTML=`<span class="mdot" style="background:${LVCOLOR[L]}"></span>
+      <div class="li"><span class="q2">${d.q}</span><br>${d.b.replace("【　】","◯")}</div>
+      <div class="ans ${listAllOpen?"":"hide"}">${d.f?"1年6か月":d.a} ${d.u}</div>`;
+    div.onclick=()=>div.querySelector(".ans").classList.toggle("hide");
+    rows.appendChild(div);
+  });
+  show("listview");
+}
+function listToggleAll(){listAllOpen=!listAllOpen;listCat(listCatCur)}
+
+/* ---------- keyboard ---------- */
+document.addEventListener("keydown",e=>{
+  if(document.getElementById("quiz").style.display!=="flex")return;
+  if(answered){if(e.key==="Enter")nextQ();return}
+  if(/^[0-9]$/.test(e.key))key(e.key);
+  else if(e.key==="Backspace")key("C");
+  else if(e.key==="Enter")submitAns();
+});
+
+refreshHome(); show("home");
+</script>
+</body>
+</html>
